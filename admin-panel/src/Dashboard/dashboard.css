@@ -1,0 +1,112 @@
+.dash-welcome{
+    font-family: Arial, Helvetica, sans-serif;
+    color: gray;
+}
+
+.dash-main{
+    padding-left: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.dash-upper{
+    display: flex;
+    gap: 30px;
+}
+.sales-card-div{
+    width: 40%;
+    height: 320px;
+    align-items: flex-start;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    background: rgb(255, 255, 255);
+}
+.salesGraph{
+    height: 100px;
+    width: 40%;
+}
+.sales-title{
+    font-size: 18px;
+    margin-left: 9px;
+    color: gray;
+    font-family: 'Courier New', Courier, monospace;
+}
+.top-selling-div{
+    width: 40%;
+    height: 320px;
+    align-items: flex-start;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto; /* Enable vertical scrolling */
+    background: rgb(255, 255, 255);
+
+}
+.prod-img{
+    width: 70px;
+    height: 70px;
+}
+.product-item{
+    display: flex;
+    gap: 10px;
+    border-bottom: 1px solid #ccc; 
+  padding: 10px; 
+  display: flex; 
+  align-items: center; 
+  counter-increment: product-counter;
+}
+.product-item::before {
+    content: counter(product-counter); 
+    font-weight: bold;
+    color: gray; 
+    margin-right: 10px; 
+  }
+.product-title , .product-price{
+  font-size: 15px;
+  color: gray;
+}
+.product-list {
+    list-style-type: none; 
+    padding: 0; 
+    counter-reset: product-counter;
+  }
+.dash-orders{
+    width: 82.5%;
+    height: 300px;
+    align-items: flex-start;
+    /* display: flex; */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    background: rgb(255, 255, 255);
+}
+.new-orders-div{
+    background: rgb(88, 88, 255);
+    width: 220px;
+    height: 150px;
+    border-radius: 15px;
+    margin-left: 15px;
+    padding: 10px;
+}
+.order-card-title{
+    font-family: 'Courier New', Courier, monospace;
+    color: whitesmoke;
+}
+.order-cards{
+    display: flex;
+    gap: 15px;
+}
+.pending-orders-div{
+    background: rgb(251, 96, 96);
+    width: 220px;
+    height: 150px;
+    border-radius: 15px;
+    margin-left: 15px;
+    padding: 10px;
+
+}
+.deliv-orders-div{
+    background: rgb(109, 200, 109);
+    width: 220px;
+    height: 150px;
+    border-radius: 15px;
+    margin-left: 15px;
+    padding: 10px;
+
+}

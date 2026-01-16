@@ -1,0 +1,57 @@
+.interior-main{
+    width: 100%;
+    height: 600px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+    background: url('./back.png') no-repeat center center;
+background-size: cover;
+background-color: lightgray; /* Set a background color if needed */
+}
+.interior-card {
+
+  }
+.interior-slider{
+    width: 80%;
+    border-radius: 15px;
+    border: 4px solid orange;
+    height: 40%;
+    backdrop-filter: blur(9px); 
+    padding: 10px;
+    /* box-shadow: 3px orange; */
+    
+}
+.interior-card-content{
+    display: flex;
+    gap: 50px;
+}
+.interior-card-title{
+    font-size: 60px;
+    color: orange;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.interior-cardtitle{
+    width: 45%;
+}
+.interior-card-detail{
+    font-size: 20px;
+    font-weight: 200;
+    color: orange;
+    letter-spacing: 3px;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.interior-card-button{
+    height: 50px;
+    width: 110px;
+    border-radius: 8px;
+    border: 3px solid orange;
+    font: "Merge One";
+    color: orange;
+    font-weight: 500;
+}
+
+.detail-button{
+    width: 50%;
+    
+}

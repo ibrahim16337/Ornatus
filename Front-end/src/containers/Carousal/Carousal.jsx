@@ -3,7 +3,7 @@ import './carousal.css';
 import { useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import ExampleCarouselImage from '../../assets/ExampleCarouselImage.png';
-//import ExampleCarouselImage2 from '../../assets/ExampleCarouselImage2.png'
+import ExampleCarouselImage2 from '../../assets/ExampleCarouselImage2.png'
 
 function Carousal() {
     const [index, setIndex] = useState(0);

@@ -261,7 +261,7 @@
 }
 .prod-reviews-div {
   display: flex;
-  height: 550px;
+  height: 650px;
   flex-direction: column;
   align-items: flex-start;
   gap: 15px;
@@ -292,8 +292,12 @@
   letter-spacing: 1.1px;
 }
 
+.review-results{
+  justify-content: center;
+}
 .star-rating {
   display: inline-block;
+  direction: rtl; /* Set direction to right-to-left */
 }
 
 .star-rating input {
@@ -304,6 +308,7 @@
   font-size: 25px;
   cursor: pointer;
   color: #ccc;
+  direction: ltr; /* Set direction to left-to-right */
 }
 
 .star-rating label:before {
@@ -359,7 +364,7 @@
   background: #fff;
   box-shadow: 0px 4px 5px 0px rgba(250, 150, 0, 0.25);
   width: 460px;
-  height: 180px;
+  height: 100px;
 }
 
 .submit-review-button {
@@ -381,4 +386,39 @@
   font-weight: 400;
   line-height: normal;
   letter-spacing: 1.2px;
+  margin-bottom: 10px;
+}
+.user-review-div{
+  max-height: 90px;
+  width: 100%;
+  overflow-y:auto ;
+}
+.review-display{
+  font: "Merge One";
+  color:#76726b;
+  background: #edebeb;
+}
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.submit-review-button.submitted {
+  background-color: #25e02b;
+  box-shadow: 0px 4px 7px 0px #009e05;
+}
+.add-to-cart-button.added{
+  background-color: #25e02b;
+  box-shadow: 0px 4px 7px 0px #009e05;
 }

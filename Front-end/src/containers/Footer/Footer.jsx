@@ -19,18 +19,18 @@ const Footer = () => {
                     </div>
                     <div className="footer-col-2">
                     <h5 className="col-2-title">Quick Links</h5>
-                    <a href="/" className="col-2-links">Home</a>
-                    <a href="/services" className="col-2-links">Services</a>
-                    <a href="/about-us" className="col-2-links">About</a>
-                    <a href="/contact-us" className="col-2-links">Contact</a>
+                    <a href="" className="col-2-links">Home</a>
+                    <a href="" className="col-2-links">Services</a>
+                    <a href="" className="col-2-links">About</a>
+                    <a href="" className="col-2-links">Contact</a>
 
                     </div>
                     <div className="footer-col-3">
                     <h5 className="col-3-title">Have a query?</h5>
-                    <a href="##" className="col-3-links"><FaLocationDot /> 53-III, K Block, Model Town,, Lahore, Pakistan</a><hr className="col-3-sepration"/>
-                    <a href="##" className="col-3-links"><IoIosCall /> 03344688189</a><hr className="col-3-sepration"/>
-                    <a href="##" className="col-3-links"><IoIosMail /> ibrahimwahid6337@gmail.com</a><hr className="col-3-sepration"/>
-                    <a href="##" className="col-3-links"><FaFacebook /> Facebook</a>
+                    <a href="" className="col-3-links"><FaLocationDot /> 53-III, K Block, Model Town,, Lahore, Pakistan</a><hr className="col-3-sepration"/>
+                    <a href="" className="col-3-links"><IoIosCall /> 03344688189</a><hr className="col-3-sepration"/>
+                    <a href="" className="col-3-links"><IoIosMail /> ibrahimwahid6337@gmail.com</a><hr className="col-3-sepration"/>
+                    <a href="" className="col-3-links"><FaFacebook /> Facebook</a>
 
                     </div>
 

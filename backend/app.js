@@ -1,88 +1,78 @@
-// Import required modules
+require("dotenv").config();
+
 var createError = require("http-errors");
 var express = require("express");
 var path = require("path");
+var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var { Pool } = require("pg");
-const cors = require("cors");
-
-// Create an Express application
+var config = require("config");
+var cors = require("cors");
 var app = express();
-var router = express.Router(); // Create a router instance
-
-// Set up the port
-const PORT = 3001;
-
-// PostgreSQL Connection
-const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "Ornatus",
-  password: "lxo8999",
-  port: 5432,
-});
-
-// Connect to PostgreSQL
-pool
-  .connect()
-  .then(() => console.log("Connected to PostgreSQL ..."))
-  .catch((error) => console.log(error.message));
-
-// Function to fetch data and return a promise
-const fetchData = async () => {
-  const client = await pool.connect(); // Connect to the database
-
-  try {
-    // Execute a sample query to fetch data
-    const result = await client.query('SELECT * FROM Products');
-    
-    const data = result.rows; // Extract the data from the query result
-    console.log(data)
-    return data; // Return the data
-
-  } finally {
-    client.release(); // Release the client back to the pool
-  }
-};
-
-
-
-// Set up middleware
 app.use(cors());
+
+// view engine setup
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "jade");
+
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
-// Route for fetching data
-app.get('/product', async (req, res) => {
-  try {
-    const fetchedData = await fetchData();
-    res.json(fetchedData);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+
+var pool = new Pool({
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: Number(process.env.PG_PORT || 5432),
 });
-// Catch 404 and forward to error handler
+
+// Your routes setup goes here
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/api/users");
+var productsRouter = require("./routes/api/products");
+var categoriesRouter = require("./routes/api/categories");
+var reviewRouter = require("./routes/api/reviews");
+var orderRouter = require("./routes/api/orders");
+app.use("/", indexRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/products", productsRouter);
+app.use("/api/category",categoriesRouter);
+app.use("/api/reviews",reviewRouter);
+app.use("/api/orders",orderRouter);
+// catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// Error handler
+// error handler
 app.use(function (err, req, res, next) {
+  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
+  // render the error page
   res.status(err.status || 500);
-  res.json({ error: 'Internal Server Error' });
+  res.render("error");
 });
 
-// Assign the router to a path
-app.use('/', router);
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.use((req, res, next) => {
+  res.status(404).send("Not Found");
 });
-// Export the app (optional, depending on your project structure)
+
+app.listen(4000, () => {
+  console.log("Server Started");
+});
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('Error connecting to PostgreSQL database:', err);
+  } else {
+    console.log('Connected to PostgreSQL');
+    // Release the client back to the pool
+    release();
+  }
+});
+
 module.exports = app;

@@ -12,7 +12,15 @@ flex-direction: column;
 align-items: center;
 justify-content: center;
 gap: 47px;
+.input-error {
+    border-color: red;
+}
 
+.error-message {
+    color: red;
+    font-size: 0.875em;
+    margin-top: 5px;
+}
 }
 .signup-form-top-text{
 align-items: center;

@@ -1,0 +1,56 @@
+.profile-main{
+    width: 100%;
+    height: 500px;
+    padding: 30px;
+}
+.profile-upper{
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    padding: 15px;
+}
+.my-acc{
+    color: #76726b;
+  font: "Merge One";
+  margin-bottom: 10px;
+}
+.logout-btn{
+    border: 2px solid orange;
+    background: white;
+    color: #76726b;
+  font: "Merge One";
+    width: 100px;
+    height: 40px;
+    border-radius: 15px;
+}
+.profile-lower {
+    overflow-y: auto;
+}
+
+.order-container {
+    max-height: 200px; 
+    width: 30%;
+    overflow-y: auto;
+}
+
+.order {
+    margin-bottom: 20px; 
+    background: #d7d7d7;
+    padding-left: 5px;
+}
+::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }

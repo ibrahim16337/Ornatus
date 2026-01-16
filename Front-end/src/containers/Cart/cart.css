@@ -1,5 +1,5 @@
 .cart-main{
-    display: flex;
+display: flex;
 padding: 80px 56px 150px 52px;
 align-items: flex-start;
 gap: 120px;
@@ -62,7 +62,6 @@ stroke: #D4840B;
 border: solid 2px #ff9900;
 }
 .cart-item{
-    display: flex;
 align-items: center;
 /* gap: 335px; */
 }
@@ -172,7 +171,7 @@ background: #FFF;
 .subtotal{
     display: flex;
 align-items: flex-start;
-gap: 101px;
+gap: 50px;
 color: #76726B;
 font: "Merge One";
 font-size: 26px;
@@ -180,7 +179,7 @@ font-style: normal;
 font-weight: 400;
 line-height: normal;
 letter-spacing: 1.04px;
-padding-right: 20px;
+/* padding-right: 20px; */
 }
 .checkout-button{
     display: flex;

@@ -1,0 +1,72 @@
+{
+  "Products": [
+    {
+      "id": 0,
+      "title": "Post 1",
+      "content": "Content 1"
+    },
+    {
+      "id": 1,
+      "title": "Post 2",
+      "content": "Content 2"
+    },
+    {
+      "id": 2,
+      "title": "Post 3",
+      "content": "Content 3"
+    }
+  ],
+  "Orders": [
+    {
+      "id": 0,
+      "status": "Pending",
+      "content": "Comment 1"
+    },
+    {
+      "id": 1,
+      "status": "Pending",
+      "content": "Comment 1"
+    },
+    {
+      "id": 2,
+      "status": "Delivered",
+      "content": "Comment 1"
+    }
+   
+  ],
+  "Sales": [
+    {
+      "id":0,
+      "Product Name": "Bed",
+      "Sales": 10,
+      "Stock": 12
+    },
+    {
+      "id":1,
+      "Product Name": "Bed",
+      "Sales": 10,
+      "Stock": 12
+    },
+    {
+      "id":2,
+      "Product Name": "Bed",
+      "Sales": 10,
+      "Stock": 12
+    }
+   
+  ],
+  "Customers": [
+    {
+      "id": "CUS-123",
+      "name": "Sameer"
+    },
+    {
+      "id": "CUS-124",
+      "name": "Ahad"
+    },
+    {
+      "id": "CUS-125",
+      "name": "Atif"
+    }
+  ]
+}

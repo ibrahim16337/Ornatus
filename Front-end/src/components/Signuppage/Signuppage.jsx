@@ -6,7 +6,7 @@ import Signupform from "../../containers/Signupform/Signupform";
 const Signuppage = () => {
     return(
         <div>
-            <Navbar />
+        <Navbar />
         <Signupform />
         <Footer />
         </div>

@@ -7,7 +7,7 @@
 .category-subdiv {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 9px;
   width: 100%;
 }
@@ -34,8 +34,10 @@
 .filter-sorting-div {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   gap: 770px;
   margin-bottom: 30px;
+  width: 100%;
 }
 .filters-div {
   display: flex;
@@ -53,6 +55,16 @@
   border: none;
 }
 .filter-dropdown:hover {
+  color: #76726b;
+  font: "Merge One";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  background: white;
+  border: none;
+}
+.filter-dropdown:active {
   color: #76726b;
   font: "Merge One";
   font-size: 20px;
@@ -82,18 +94,21 @@
 }
 .products-div {
   display: flex;
-  flex-direction: column;
+  width: 100%;
   align-items: flex-start;
-  gap: 55px;
+  justify-content: space-between;
+  background: yellowgreen;
 }
 .product-card {
   display: flex;
   width: 255px;
-  height: 266px;
+  height: 280px;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 4px;
   flex-shrink: 0;
+  
+  margin: 10px;
 }
 .product-img {
   width: 249.19px;
@@ -115,4 +130,30 @@
   font-weight: 400;
   line-height: normal;
   letter-spacing: 1px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; 
+}
+
+.custom-pagination .page-item .page-link {
+  background-color: white;
+  color: orange;
+  border-color: #d27e00;
+  border-radius: 25px;
+  margin: 3px;
+}
+.custom-pagination .page-item.active .page-link {
+  background-color: orange;
+  color: white;
+  border-color: #d27e00;
+  border-radius: 25px;
+  margin: 3px;
+}
+
+.prod-row{
+  align-items: flex-start;
+  display: flex;
 }
