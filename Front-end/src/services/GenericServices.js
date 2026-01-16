@@ -1,5 +1,5 @@
 import axios from "axios";
-axios.defaults.baseURL = "http://localhost:4000/api/";
+axios.defaults.baseURL = (process.env.REACT_APP_API_URL || "http://localhost:4000/api").replace(/\/$/, "") + "/";
 axios.defaults.headers.common["x-auth-token"] = localStorage.getItem("token");
 class GenericService {
   

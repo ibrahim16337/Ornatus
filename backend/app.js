@@ -62,9 +62,11 @@ app.use((req, res, next) => {
   res.status(404).send("Not Found");
 });
 
-app.listen(4000, () => {
-  console.log("Server Started");
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server Started on port ${PORT}`);
 });
+
 pool.connect((err, client, release) => {
   if (err) {
     console.error('Error connecting to PostgreSQL database:', err);

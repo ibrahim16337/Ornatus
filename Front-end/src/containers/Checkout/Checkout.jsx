@@ -7,7 +7,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import orderService from "../../services/OrderService";
 
 const Checkout = () => {
-  const apiUrl = 'http://localhost:4000/api';
+  const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:4000/api";
   const cart = useSelector((state) => state.cart);
 
   // State for form fields, initialized from localStorage or defaults
