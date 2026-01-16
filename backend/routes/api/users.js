@@ -6,12 +6,13 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 const _ = require("lodash");
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'Furniture',
-  password: 'lxo8999',
-  port: 5432,
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: Number(process.env.PG_PORT || 5432),
 });
+
 
 // Define routes
 router.post("/register", async (req, res) => {

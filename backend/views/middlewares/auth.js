@@ -3,12 +3,13 @@ const config = require("config");
 const { Pool } = require("pg");
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost', // Or your PostgreSQL host
-  database: 'Furniture',
-  password: 'lxo8999',
-  port: 5432, // Default PostgreSQL port
+  user: process.env.PG_USER,
+  host: process.env.PG_HOST,
+  database: process.env.PG_DATABASE,
+  password: process.env.PG_PASSWORD,
+  port: Number(process.env.PG_PORT || 5432),
 });
+
 
 async function auth(req, res, next) {
   let token = req.header("x-auth-token");
