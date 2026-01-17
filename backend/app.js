@@ -63,18 +63,22 @@ app.use((req, res, next) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server Started on port ${PORT}`);
-});
 
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('Error connecting to PostgreSQL database:', err);
-  } else {
-    console.log('Connected to PostgreSQL');
-    // Release the client back to the pool
-    release();
-  }
-});
+// Only listen when running locally (node app.js)
+// On Vercel, the file is imported as a serverless function, so we do NOT listen.
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server Started on port ${PORT}`);
+  });
+
+  pool.connect((err, client, release) => {
+    if (err) {
+      console.error("Error connecting to PostgreSQL database:", err);
+    } else {
+      console.log("Connected to PostgreSQL");
+      release();
+    }
+  });
+}
 
 module.exports = app;
