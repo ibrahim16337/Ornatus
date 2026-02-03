@@ -6,7 +6,6 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var { Pool } = require("pg");
-var config = require("config");
 var cors = require("cors");
 
 var app = express();
@@ -22,19 +21,34 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-// ✅ Postgres pool (supports Neon/Vercel SSL via PG_SSL=true)
-var pool = new Pool({
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DATABASE,
-  password: process.env.PG_PASSWORD,
-  port: Number(process.env.PG_PORT || 5432),
+// ✅ Reuse Pool across Vercel invocations (prevents too many connections)
+const pool =
+  global.__pgPool ||
+  new Pool({
+    user: process.env.PG_USER,
+    host: process.env.PG_HOST,
+    database: process.env.PG_DATABASE,
+    password: process.env.PG_PASSWORD,
+    port: Number(process.env.PG_PORT || 5432),
 
-  // If PG_SSL is "true", enable SSL (Neon requires this in production)
-  ssl: process.env.PG_SSL === "true" ? { rejectUnauthorized: false } : false,
+    // Neon/Vercel SSL: set PG_SSL=true in Vercel env vars
+    ssl: process.env.PG_SSL === "true" ? { rejectUnauthorized: false } : false,
+  });
+
+global.__pgPool = pool;
+
+// ✅ quick health endpoint to test DB on Vercel
+app.get("/api/health", async (req, res) => {
+  try {
+    const r = await pool.query("SELECT NOW() as now");
+    return res.json({ ok: true, db: true, now: r.rows[0].now });
+  } catch (e) {
+    console.error("DB health check failed:", e);
+    return res.status(500).json({ ok: false, db: false, error: e.message });
+  }
 });
 
-// Your routes setup goes here
+// routes
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/api/users");
 var productsRouter = require("./routes/api/products");
@@ -58,34 +72,28 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
-
   res.status(err.status || 500);
   res.render("error");
 });
 
-// fallback 404
-app.use((req, res, next) => {
+app.use((req, res) => {
   res.status(404).send("Not Found");
 });
 
 const PORT = process.env.PORT || 4000;
 
-// Only listen when running locally (node app.js)
-// On Vercel, app.js is imported as a serverless function, so do NOT listen.
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server Started on port ${PORT}`);
   });
 
-  // Optional: quick connection check when running locally
-  pool.connect((err, client, release) => {
-    if (err) {
-      console.error("Error connecting to PostgreSQL database:", err);
-    } else {
+  pool
+    .connect()
+    .then((client) => {
       console.log("Connected to PostgreSQL");
-      release();
-    }
-  });
+      client.release();
+    })
+    .catch((err) => console.error("Error connecting to PostgreSQL database:", err));
 }
 
 module.exports = app;

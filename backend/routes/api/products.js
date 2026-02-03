@@ -4,189 +4,210 @@ const auth = require("../../middlewares/auth");
 const admin = require("../../middlewares/admin");
 const { Pool } = require("pg");
 
-// Create a new Pool instance for PostgreSQL connection
+// Neon/Vercel SSL fix (set PG_SSL=true in Vercel env vars)
 const pool = new Pool({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
   port: Number(process.env.PG_PORT || 5432),
+  ssl: process.env.PG_SSL === "true" ? { rejectUnauthorized: false } : false,
 });
 
+// Only allow sorting by these columns (prevents SQL injection)
+const ALLOWED_SORT_COLUMNS = new Set([
+  "name",
+  "price",
+  "stock",
+  "id",
+  "timestamp_id",
+]);
 
-// GET all products or products by category
+const normalizeSortOrder = (value) => {
+  return String(value || "asc").toLowerCase() === "desc" ? "DESC" : "ASC";
+};
 
+// GET all products OR filter by category/style/availability + sorting
+// /api/products?category=Chair&availability=In%20Stock&sortBy=price&sortOrder=desc
 router.get("/", async (req, res) => {
   try {
-    const client = await pool.connect();
     let categoryName = req.query.category;
-    let sortBy = req.query.sortBy || 'name';
-    let sortOrder = req.query.sortOrder || 'asc';
-    let availability = req.query.availability || '';
-    console.log(categoryName, sortBy, sortOrder, availability);
+    let availability = req.query.availability || "";
+    let sortBy = req.query.sortBy || "name";
+    let sortOrder = normalizeSortOrder(req.query.sortOrder);
 
-    // Construct the base query
-    let query = `SELECT * FROM products`;
+    // sanitize sortBy
+    if (!ALLOWED_SORT_COLUMNS.has(sortBy)) {
+      sortBy = "name";
+    }
 
-    // Check if a category name is provided
-    if (categoryName && categoryName.toLowerCase() !== 'all') {
-      // Fetch category_id based on category name
-      let categoryIdQuery = `SELECT timestamp_id FROM categories WHERE categories = $1`;
-      let categoryIdParams = [categoryName];
+    const where = [];
+    const params = [];
+    let p = 1;
 
-      const categoryIdResult = await client.query(categoryIdQuery, categoryIdParams);
-      const categoryId = categoryIdResult.rows.length > 0 ? categoryIdResult.rows[0].timestamp_id : null;
-      console.log("Category ID:", categoryId);
+    // category/style filter (by name -> get timestamp_id -> filter products)
+    if (categoryName && String(categoryName).toLowerCase() !== "all") {
+      // Try categories table first
+      let categoryId = null;
+      const catRes = await pool.query(
+        "SELECT timestamp_id FROM categories WHERE categories = $1",
+        [categoryName]
+      );
+      if (catRes.rows.length > 0) categoryId = catRes.rows[0].timestamp_id;
 
       if (categoryId) {
-        query += ` WHERE category_id = '${categoryId}'`;
+        where.push(`category_id = $${p++}`);
+        params.push(categoryId);
       } else {
-        // If category not found, check if it exists in the styles table
-        let styleIdQuery = `SELECT timestamp_id FROM styles WHERE style = $1`;
-        let styleIdParams = [categoryName];
-
-        const styleIdResult = await client.query(styleIdQuery, styleIdParams);
-        const styleId = styleIdResult.rows.length > 0 ? styleIdResult.rows[0].timestamp_id : null;
-        console.log("Style ID:", styleId);
+        // Try styles table next
+        let styleId = null;
+        const styleRes = await pool.query(
+          "SELECT timestamp_id FROM styles WHERE style = $1",
+          [categoryName]
+        );
+        if (styleRes.rows.length > 0) styleId = styleRes.rows[0].timestamp_id;
 
         if (styleId) {
-          query += ` WHERE style_id = '${styleId}'`;
-        } else {
-          // If category and style not found, fetch all products
-          categoryName = 'all';
+          where.push(`style_id = $${p++}`);
+          params.push(styleId);
         }
       }
     }
 
-    // Check if availability filter is provided
-    if (availability && availability.toLowerCase() !== 'all') {
-      // Add availability filter to the query
-      if (query.includes('WHERE')) {
-        query += ` AND`;
-      } else {
-        query += ` WHERE`;
-      }
-      if (availability === 'In Stock') {
-        query += ` stock > 0`;
-      } else if (availability === 'Out of Stock') {
-        query += ` stock <= 0`;
-      }
+    // availability filter
+    if (availability && String(availability).toLowerCase() !== "all") {
+      if (availability === "In Stock") where.push("stock > 0");
+      if (availability === "Out of Stock") where.push("stock <= 0");
     }
 
-    // Add sorting to the query
-    query += ` ORDER BY ${sortBy} ${sortOrder}`;
-    console.log("Final Query:", query);
+    let sql = "SELECT * FROM products";
+    if (where.length) {
+      sql += " WHERE " + where.join(" AND ");
+    }
 
-    const result = await client.query(query);
-    const products = {
+    sql += ` ORDER BY ${sortBy} ${sortOrder}`;
+
+    const result = await pool.query(sql, params);
+
+    return res.json({
       data: result.rows,
-      total: result.rows.length
-    };
-    client.release();
-
-    return res.send(products);
+      total: result.rows.length,
+    });
   } catch (error) {
     console.error("Error retrieving products:", error);
     return res.status(500).send("Internal Server Error");
   }
 });
 
-// Search products
+// Search products safely
+// /api/products/search?searchTerm=chair
 router.get("/search", async (req, res) => {
   try {
-    const client = await pool.connect();
-    const searchTerm = req.query.searchTerm;
-    const query = `SELECT * FROM products WHERE name LIKE '%${searchTerm}%'`;
-    console.log("Search Query:", query);
+    const searchTerm = String(req.query.searchTerm || "").trim();
 
-    const result = await client.query(query);
-    const products = result.rows;
-    client.release();
+    // If empty, return empty array instead of querying everything
+    if (!searchTerm) return res.json([]);
 
-    return res.send(products);
+    const result = await pool.query(
+      "SELECT * FROM products WHERE name ILIKE $1",
+      [`%${searchTerm}%`]
+    );
+
+    return res.json(result.rows);
   } catch (error) {
     console.error("Error searching products:", error);
     return res.status(500).send("Internal Server Error");
   }
 });
 
-
+// React-admin getOne (your admin panel uses this)
 router.get("/get-by-id/:id", async (req, res) => {
   try {
-    const client = await pool.connect();
-    const result = await client.query(`SELECT * FROM products WHERE id = $1`, [req.params.id]);
-    const product = result.rows[0];
-    client.release();
+    const result = await pool.query("SELECT * FROM products WHERE id = $1", [
+      req.params.id,
+    ]);
 
+    const product = result.rows[0];
     if (!product) {
-      return res.status(400).send("Product with given ID is not present"); // When id is not present in db
+      return res.status(404).send("Product with given ID is not present");
     }
-    return res.send({
-      data: product
-    }); // Everything is ok
+
+    return res.json({ data: product });
   } catch (error) {
     console.error("Error retrieving product:", error);
     return res.status(500).send("Internal Server Error");
   }
 });
 
-// GET single product
+// GET single product by timestamp_id (keep your existing behavior)
 router.get("/:id", async (req, res) => {
   try {
-    const client = await pool.connect();
-    const result = await client.query(`SELECT * FROM products WHERE timestamp_id = $1`, [req.params.id]);
-    const product = result.rows[0];
-    client.release();
+    const result = await pool.query(
+      "SELECT * FROM products WHERE timestamp_id = $1",
+      [req.params.id]
+    );
 
+    const product = result.rows[0];
     if (!product) {
-      return res.status(400).send("Product with given ID is not present"); // When id is not present in db
+      return res.status(404).send("Product with given ID is not present");
     }
 
-    return res.send(product); // Everything is ok
+    return res.json(product);
   } catch (error) {
     console.error("Error retrieving product:", error);
     return res.status(500).send("Internal Server Error");
   }
 });
-// GET single product By Name
-router.get("/:id", async (req, res) => {
-  try {
-    const client = await pool.connect();
-    const result = await client.query(`SELECT * FROM products WHERE name = $1`, [req.params.name]);
-    const product = result.rows[0];
-    client.release();
 
-    if (!product) {
-      return res.status(400).send("Product with given Name is not present"); // When id is not present in db
-    }
-
-    return res.send(product); // Everything is ok
-  } catch (error) {
-    console.error("Error retrieving product:", error);
-    return res.status(500).send("Internal Server Error");
-  }
-});
-// Update a record
+// UPDATE a record (optional: add auth/admin if you want)
 router.put("/:id", async (req, res) => {
   try {
-    const client = await pool.connect();
-    await client.query(`UPDATE products SET id=$1, timestamp_id=$2, name=$3, category_id=$4, style_id=$5, price=$6, description=$7, stock=$8, image=$9
-    WHERE id = $10`, [ req.body.id, req.body.timestamp_id, req.body.name,req.body.category_id,req.body.style_id, req.body.price,req.body.description,req.body.stock,req.body.image, req.params.id]);
-    client.release();
+    // keep your existing payload style
+    const body = req.body;
 
-    return res.send("Product updated successfully");
+    const result = await pool.query(
+      `UPDATE products
+       SET id=$1, timestamp_id=$2, name=$3, category_id=$4, style_id=$5, price=$6, description=$7, stock=$8, image=$9
+       WHERE id = $10
+       RETURNING *`,
+      [
+        body.id,
+        body.timestamp_id,
+        body.name,
+        body.category_id,
+        body.style_id,
+        body.price,
+        body.description,
+        body.stock,
+        body.image,
+        req.params.id,
+      ]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).send("Product with given ID is not present");
+    }
+
+    // react-admin likes { data: ... } but your old code returned a string.
+    // returning the updated product is better.
+    return res.json({ data: result.rows[0] });
   } catch (error) {
     console.error("Error updating product:", error);
     return res.status(500).send("Internal Server Error");
   }
 });
 
-// Delete a record
+// DELETE a record
 router.delete("/:id", async (req, res) => {
   try {
-    const client = await pool.connect();
-    await client.query(`DELETE FROM products WHERE id = $1`, [req.params.id]);
-    client.release();
+    const result = await pool.query(
+      "DELETE FROM products WHERE id = $1 RETURNING *",
+      [req.params.id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).send("Product with given ID is not present");
+    }
 
     return res.send("Product deleted successfully");
   } catch (error) {
@@ -195,24 +216,29 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Insert a record
+// INSERT a record (react-admin create)
+// expects req.body.data like your current code
 router.post("/", async (req, res) => {
   try {
-    const client = await pool.connect();
-    const body = req.body.data
-    console.log(body)
-    await client.query(`INSERT INTO products(
-      name, category_id, style_id, price, description, stock)
-      VALUES ($1, $2 , $3 , $4 , $5, $6)`, [body.name, body.category, body.style, body.price, body.description, body.stock]);
-    client.release();
+    const body = req.body.data || {};
+    console.log(body);
 
-    // sending some dummy data in response, because react-admin expects response in this format
-    return res.send({
-      data: {
-        id: 123,
-        name: "product"
-      }
-    });
+    const result = await pool.query(
+      `INSERT INTO products (name, category_id, style_id, price, description, stock)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [
+        body.name,
+        body.category,
+        body.style,
+        body.price,
+        body.description,
+        body.stock,
+      ]
+    );
+
+    // Return the inserted row as react-admin expects
+    return res.json({ data: result.rows[0] });
   } catch (error) {
     console.error("Error inserting product:", error);
     return res.status(500).send("Internal Server Error");
